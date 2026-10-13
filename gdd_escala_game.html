@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ESCALA Game — Game Design Document v1.0</title>
+<style>
+  :root {
+    --blue:#0033cc;--yellow:#f5c842;--pink:#e8346a;--green:#22c55e;
+    --orange:#f97316;--dark:#0a0f1e;--mid:#1e293b;--light:#94a3b8;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:Georgia,serif;background:#f8fafc;color:#1e293b;line-height:1.7}
+
+  /* ─── Cover ─── */
+  .cover{
+    background:linear-gradient(135deg,#0a0f1e 0%,#001a6e 60%,#003399 100%);
+    color:white;padding:80px 60px;min-height:300px;
+    display:flex;flex-direction:column;justify-content:flex-end;
+    position:relative;overflow:hidden;
+  }
+  .cover::before{
+    content:'';position:absolute;inset:0;
+    background-image:radial-gradient(rgba(255,255,255,.05) 1px,transparent 1px);
+    background-size:24px 24px;
+  }
+  .cover-badge{
+    display:inline-block;background:var(--yellow);color:#0a0f1e;
+    font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+    padding:4px 14px;border-radius:100px;margin-bottom:20px;
+    font-family:Arial,sans-serif;position:relative;
+  }
+  .cover h1{
+    font-size:56px;font-weight:900;font-family:'Arial Black',sans-serif;
+    line-height:1.05;position:relative;
+  }
+  .cover h1 span{color:var(--yellow)}
+  .cover-meta{
+    margin-top:24px;font-family:Arial,sans-serif;font-size:13px;
+    color:rgba(255,255,255,.5);letter-spacing:.5px;position:relative;
+  }
+  .cover-meta strong{color:rgba(255,255,255,.8)}
+
+  /* ─── Content ─── */
+  .content{max-width:860px;margin:0 auto;padding:56px 40px 80px}
+
+  /* ─── TOC ─── */
+  .toc{background:white;border:1px solid #e2e8f0;border-radius:16px;padding:28px 32px;margin-bottom:48px}
+  .toc h2{font-size:11px;text-transform:uppercase;letter-spacing:2px;color:var(--light);margin-bottom:14px;font-family:Arial,sans-serif}
+  .toc ol{padding-left:20px}
+  .toc li{margin:5px 0;font-size:14px}
+  .toc a{color:var(--blue);text-decoration:none}
+  .toc a:hover{text-decoration:underline}
+
+  /* ─── Sections ─── */
+  section{margin-bottom:56px;scroll-margin-top:24px}
+  h2{
+    font-size:26px;font-family:'Arial Black',sans-serif;font-weight:900;
+    color:var(--dark);border-bottom:3px solid var(--yellow);
+    padding-bottom:8px;margin-bottom:24px;
+  }
+  h3{font-size:16px;font-family:Arial,sans-serif;font-weight:700;color:var(--blue);margin:24px 0 10px}
+  p{margin-bottom:14px;font-size:15px}
+  ul,ol{padding-left:22px;margin-bottom:14px}
+  li{margin:5px 0;font-size:15px}
+
+  /* ─── Info boxes ─── */
+  .box{border-radius:12px;padding:18px 22px;margin:18px 0;font-size:14px}
+  .box-blue  {background:#eff6ff;border-left:4px solid var(--blue)}
+  .box-yellow{background:#fefce8;border-left:4px solid var(--yellow)}
+  .box-green {background:#f0fdf4;border-left:4px solid var(--green)}
+  .box h4{font-weight:700;margin-bottom:8px;font-family:Arial,sans-serif;font-size:12px;text-transform:uppercase;letter-spacing:1px}
+
+  /* ─── Stats ─── */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:20px 0}
+  .stat{background:white;border:1px solid #e2e8f0;border-radius:12px;padding:16px;text-align:center}
+  .stat-value{font-size:30px;font-weight:900;font-family:'Arial Black',sans-serif;color:var(--dark)}
+  .stat-label{font-size:11px;color:var(--light);text-transform:uppercase;letter-spacing:1px;margin-top:4px;font-family:Arial,sans-serif}
+
+  /* ─── Card grid ─── */
+  .card-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin:18px 0}
+  .card-item{background:white;border:1px solid #e2e8f0;border-radius:12px;padding:16px 20px}
+  .card-item h4{font-family:Arial,sans-serif;font-weight:700;font-size:14px;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+  .card-item p{font-size:13px;color:#475569;margin:0}
+
+  /* ─── Badges ─── */
+  .badge{display:inline-block;padding:2px 8px;border-radius:100px;font-size:11px;font-weight:700;font-family:Arial,sans-serif}
+  .badge-pink  {background:#fce7f3;color:#be185d}
+  .badge-blue  {background:#dbeafe;color:#1d4ed8}
+  .badge-orange{background:#fff7ed;color:#c2410c}
+  .badge-green {background:#dcfce7;color:#166534}
+  .badge-gray  {background:#f1f5f9;color:#475569}
+  .badge-purple{background:#f5f3ff;color:#6d28d9}
+
+  /* ─── Power cards ─── */
+  .power-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin:18px 0}
+  .power-card{border-radius:14px;padding:20px;color:white}
+  .power-card.becuadro   {background:linear-gradient(135deg,#374151,#111827)}
+  .power-card.intercambio{background:linear-gradient(135deg,#7c3aed,#3b0764)}
+  .power-card.skip       {background:linear-gradient(135deg,#d97706,#92400e)}
+  .power-card.cambio     {background:linear-gradient(135deg,#dc2626,#7f1d1d)}
+  .power-card .symbol{font-size:32px;font-weight:900;line-height:1}
+  .power-card h4{font-family:Arial,sans-serif;font-weight:700;font-size:15px;margin:8px 0 4px}
+  .power-card p{font-size:12px;color:rgba(255,255,255,.75);margin:0;line-height:1.5}
+
+  /* ─── Tables ─── */
+  table{width:100%;border-collapse:collapse;font-size:13px;margin:14px 0;font-family:'Courier New',monospace}
+  th{background:var(--dark);color:white;padding:10px 12px;text-align:left;font-family:Arial,sans-serif;font-size:12px}
+  td{padding:8px 12px;border-bottom:1px solid #e2e8f0}
+  tr:nth-child(even) td{background:#f8fafc}
+
+  /* ─── Turn flow ─── */
+  .flow{display:flex;margin:18px 0;overflow-x:auto}
+  .flow-step{
+    flex:1;min-width:110px;background:white;border:1px solid #e2e8f0;
+    border-right:none;padding:14px 10px;text-align:center;font-size:12px;
+    font-family:Arial,sans-serif;
+  }
+  .flow-step:last-child{border-right:1px solid #e2e8f0;border-radius:0 8px 8px 0}
+  .flow-step:first-child{border-radius:8px 0 0 8px}
+  .flow-step .step-num{
+    width:24px;height:24px;background:var(--blue);color:white;
+    border-radius:50%;font-weight:700;font-size:12px;
+    display:flex;align-items:center;justify-content:center;margin:0 auto 8px;
+  }
+  .flow-step .step-title{font-weight:700;color:var(--dark);margin-bottom:4px;font-size:11px}
+  .flow-step .step-desc{color:var(--light);font-size:10px;line-height:1.4}
+
+  /* ─── Deck bar ─── */
+  .deck-bar{display:flex;height:30px;border-radius:8px;overflow:hidden;margin:14px 0 6px}
+  .deck-segment{display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;font-family:Arial,sans-serif;color:white}
+  .deck-natural{background:var(--green);flex:56}
+  .deck-altered{background:var(--blue);flex:56}
+  .deck-power  {background:var(--pink);flex:8}
+  .deck-legend{display:flex;gap:20px;font-size:12px;font-family:Arial,sans-serif;color:var(--light);margin-bottom:18px}
+  .deck-legend span::before{display:inline-block;width:10px;height:10px;border-radius:3px;content:'';margin-right:5px;vertical-align:middle}
+  .deck-legend .l-n::before{background:var(--green)}
+  .deck-legend .l-a::before{background:var(--blue)}
+  .deck-legend .l-p::before{background:var(--pink)}
+
+  /* ─── Enharmonic chips ─── */
+  .enharmonic{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+  .enharm-pair{background:white;border:1px solid #e2e8f0;border-radius:8px;padding:5px 14px;font-family:'Courier New',monospace;font-size:14px;font-weight:600;color:var(--dark)}
+  .enharm-pair .eq{color:var(--light);margin:0 5px}
+
+  /* ─── Screen grid ─── */
+  .screen-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:18px 0}
+  .screen-box{background:var(--dark);border-radius:12px;padding:22px 16px;text-align:center;color:white;min-height:110px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .screen-box .screen-icon{font-size:26px;margin-bottom:8px}
+  .screen-box .screen-name{font-family:Arial,sans-serif;font-weight:700;font-size:11px;color:rgba(255,255,255,.65);text-transform:uppercase;letter-spacing:1px}
+
+  /* ─── Footer ─── */
+  footer{background:var(--dark);color:rgba(255,255,255,.35);text-align:center;padding:28px;font-size:12px;font-family:Arial,sans-serif;letter-spacing:.5px}
+</style>
+</head>
+<body>
+
+<!-- ═══════════ COVER ═══════════ -->
+<div class="cover">
+  <div class="cover-badge">Game Design Document · v1.0</div>
+  <h1><span>ESCALA</span> Game<br>Digital Edition</h1>
+  <div class="cover-meta">
+    <strong>Musiktoys</strong> &nbsp;·&nbsp; Versión Digital &nbsp;·&nbsp; Julio 2026 &nbsp;·&nbsp; Documento de Diseño de Juego
+  </div>
+</div>
+
+<div class="content">
+
+<!-- ═══════════ TOC ═══════════ -->
+<div class="toc">
+  <h2>Contenido</h2>
+  <ol>
+    <li><a href="#s1">Visión General</a></li>
+    <li><a href="#s2">Propuesta de Valor y Contexto Educativo</a></li>
+    <li><a href="#s3">Sistema de Cartas</a></li>
+    <li><a href="#s4">Sistema de Escalas</a></li>
+    <li><a href="#s5">Mecánica Central del Turno</a></li>
+    <li><a href="#s6">Cartas de Poder</a></li>
+    <li><a href="#s7">Condición de Victoria</a></li>
+    <li><a href="#s8">Pantallas y Flujo de Jugador (UX)</a></li>
+    <li><a href="#s9">Diseño Visual de Cartas</a></li>
+    <li><a href="#s10">Roadmap de Funcionalidades</a></li>
+    <li><a href="#s11">Glosario</a></li>
+  </ol>
+</div>
+
+<!-- ═══════════ 1. Visión General ═══════════ -->
+<section id="s1">
+  <h2>1. Visión General</h2>
+  <div class="stats">
+    <div class="stat"><div class="stat-value">2–6</div><div class="stat-label">Jugadores</div></div>
+    <div class="stat"><div class="stat-value">8+</div><div class="stat-label">Edad recomendada</div></div>
+    <div class="stat"><div class="stat-value">10–30</div><div class="stat-label">Minutos / partida</div></div>
+    <div class="stat"><div class="stat-value">120</div><div class="stat-label">Cartas en mazo</div></div>
+  </div>
+
+  <h3>Resumen ejecutivo</h3>
+  <p><strong>ESCALA Game</strong> es un juego de cartas educativo de gestión de mano donde los jugadores compiten por ser los primeros en coleccionar las 8 notas que conforman una escala musical completa (mayor o menor). Combina teoría musical real con una mecánica accesible que produce comprensión intuitiva de las escalas a través del juego repetido.</p>
+
+  <h3>Género y referencias de diseño</h3>
+  <div class="card-grid">
+    <div class="card-item">
+      <h4>🃏 Gestión de mano</h4>
+      <p>Como Rummy o Go Fish: robas, descartas y coleccionas el conjunto correcto de cartas para completar tu objetivo.</p>
+    </div>
+    <div class="card-item">
+      <h4>🎵 Puzzle educativo</h4>
+      <p>El "puzzle" es la escala musical. Entender qué notas corresponden a tu objetivo es el reto cognitivo central.</p>
+    </div>
+    <div class="card-item">
+      <h4>⚡ Interferencia competitiva</h4>
+      <p>Las cartas de poder permiten bloquear turnos, robar cartas a rivales o cambiar la escala activa, añadiendo tensión estratégica.</p>
+    </div>
+    <div class="card-item">
+      <h4>📐 Escalabilidad de dificultad</h4>
+      <p>Escalas simples (Do Mayor, La menor) vs. complejas (Do♯ Mayor, Sib menor) permiten ajustar el reto al nivel del jugador.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ 2. Propuesta de Valor ═══════════ -->
+<section id="s2">
+  <h2>2. Propuesta de Valor y Contexto Educativo</h2>
+
+  <h3>Propósito pedagógico</h3>
+  <p>El juego fue diseñado por <strong>Musiktoys</strong> para que estudiantes y docentes de música interioricen las escalas musicales de forma natural, sin memorización forzada. La mecánica de «necesito encontrar el Fa♯ para completar mi escala de Sol Mayor» crea una necesidad real y repetida de recordar las notas de cada escala.</p>
+
+  <div class="box box-blue">
+    <h4>💡 Insight pedagógico clave</h4>
+    La equivalencia enarmónica (Do♯ = Re♭) es un concepto avanzado de teoría musical que el juego introduce de forma práctica: cuando el jugador intenta usar una carta y descubre que «sirve igual», aprende enharmonía sin que nadie se lo explique directamente. El aprendizaje es una consecuencia del juego, no el objetivo declarado.
+  </div>
+
+  <h3>Perfil de usuario objetivo</h3>
+  <ul>
+    <li><strong>Primario:</strong> Estudiantes de música de 8 a 18 años cursando teoría musical en conservatorio, escuela de música o educación formal.</li>
+    <li><strong>Secundario:</strong> Docentes de música que buscan una herramienta de evaluación lúdica o actividad de cierre de clase.</li>
+    <li><strong>Terciario:</strong> Adultos con interés musical casual, familias con algún músico, o cualquier persona curiosa por las escalas.</li>
+  </ul>
+
+  <h3>Propuesta única de valor (digital)</h3>
+  <ul>
+    <li>Accesible desde el sitio web de Musiktoys sin instalación.</li>
+    <li>Permite jugar partidas locales en el mismo dispositivo (hot-seat) mientras se desarrolla el multijugador online.</li>
+    <li>La validación automática de escalas elimina el riesgo de errores de reglas que sí ocurren en el juego físico.</li>
+    <li>El progreso de escala visual (barra de notas verde/gris) hace visible el aprendizaje en tiempo real.</li>
+  </ul>
+</section>
+
+<!-- ═══════════ 3. Sistema de Cartas ═══════════ -->
+<section id="s3">
+  <h2>3. Sistema de Cartas</h2>
+
+  <h3>Composición del mazo — 120 cartas</h3>
+  <div class="deck-bar">
+    <div class="deck-segment deck-natural">56 naturales</div>
+    <div class="deck-segment deck-altered">56 alteradas</div>
+    <div class="deck-segment deck-power">8</div>
+  </div>
+  <div class="deck-legend">
+    <span class="l-n">56 notas naturales</span>
+    <span class="l-a">56 notas alteradas</span>
+    <span class="l-p">8 cartas de poder</span>
+  </div>
+
+  <h3>Cartas de notas naturales (56)</h3>
+  <p>Fórmula: <strong>7 notas × 4 colores × 2 copias = 56</strong></p>
+  <table>
+    <tr><th>Nota</th><th>Equivalente anglosajón</th><th>Colores</th><th>Copias</th></tr>
+    <tr><td><strong>Do</strong></td><td>C</td><td>Rosa · Azul · Naranja · Verde</td><td>2</td></tr>
+    <tr><td><strong>Re</strong></td><td>D</td><td>Rosa · Azul · Naranja · Verde</td><td>2</td></tr>
+    <tr><td><strong>Mi</strong></td><td>E</td><td>Rosa · Azul · Naranja · Verde</td><td>2</td></tr>
+    <tr><td><strong>Fa</strong></td><td>F</td><td>Rosa · Azul · Naranja · Verde</td><td>2</td></tr>
+    <tr><td><strong>Sol</strong></td><td>G</td><td>Rosa · Azul · Naranja · Verde</td><td>2</td></tr>
+    <tr><td><strong>La</strong></td><td>A</td><td>Rosa · Azul · Naranja · Verde</td><td>2</td></tr>
+    <tr><td><strong>Si</strong></td><td>B</td><td>Rosa · Azul · Naranja · Verde</td><td>2</td></tr>
+  </table>
+
+  <div class="box box-yellow">
+    <h4>🎨 El color no afecta la jugabilidad</h4>
+    Los 4 colores sirven únicamente para diferenciación visual y accesibilidad para daltónicos (cada carta incluye una forma impresa en el juego físico; en la versión digital se usa la guía cromática del manual). Cualquier carta de «Do», sin importar su color, es válida para cualquier posición de Do en la escala.
+  </div>
+
+  <h3>Cartas de notas alteradas (56)</h3>
+  <p>Fórmula: <strong>7 alteraciones × 4 colores × 2 copias = 56</strong>. Las cartas llevan el nombre con sostenido (♯); su equivalente bemol puede usarse gracias a la equivalencia enarmónica del motor.</p>
+  <table>
+    <tr><th>Carta (sostenido ♯)</th><th>Equivalente bemol (♭)</th><th>Semitono</th><th>Notas adyacentes (Becuadro)</th></tr>
+    <tr><td><strong>Do♯</strong></td><td>Re♭</td><td>1</td><td>Do ó Re</td></tr>
+    <tr><td><strong>Re♯</strong></td><td>Mi♭</td><td>3</td><td>Re ó Mi</td></tr>
+    <tr><td><strong>Mi♯</strong></td><td>Fa (enarmónico exacto)</td><td>5</td><td>Mi ó Fa</td></tr>
+    <tr><td><strong>Fa♯</strong></td><td>Sol♭</td><td>6</td><td>Fa ó Sol</td></tr>
+    <tr><td><strong>Sol♯</strong></td><td>La♭</td><td>8</td><td>Sol ó La</td></tr>
+    <tr><td><strong>La♯</strong></td><td>Si♭</td><td>10</td><td>La ó Si</td></tr>
+    <tr><td><strong>Si♯</strong></td><td>Do (enarmónico exacto)</td><td>12</td><td>Si ó Do</td></tr>
+  </table>
+
+  <h3>Cartas de poder (8)</h3>
+  <p>4 tipos × 2 copias = 8 cartas. Se almacenan en la mano; se juegan como acción de turno en lugar de robar.</p>
+</section>
+
+<!-- ═══════════ 4. Sistema de Escalas ═══════════ -->
+<section id="s4">
+  <h2>4. Sistema de Escalas</h2>
+
+  <h3>Estructura de una escala en el juego</h3>
+  <p>Cada escala objetivo tiene <strong>8 posiciones</strong>: 7 notas únicas más la octava (repetición de la tónica). Para ganar, el jugador debe tener en mano exactamente las cartas correspondientes a esas 8 posiciones.</p>
+
+  <div class="box box-blue">
+    <h4>Fórmulas de intervalos</h4>
+    <strong>Mayor:</strong> T · T · S · T · T · T · S &nbsp;&nbsp;&nbsp;
+    <strong>Menor natural:</strong> T · S · T · T · S · T · T<br>
+    <small style="color:#64748b">(T = Tono = 2 semitonos &nbsp;|&nbsp; S = Semitono = 1 semitono)</small>
+  </div>
+
+  <h3>Escalas Mayores — 11 implementadas</h3>
+  <table>
+    <tr><th>Escala</th><th>Notas (tónica → octava)</th><th>Alteraciones</th></tr>
+    <tr><td>Do Mayor</td><td>Do · Re · Mi · Fa · Sol · La · Si · Do</td><td><span class="badge badge-blue">0</span></td></tr>
+    <tr><td>Sol Mayor</td><td>Sol · La · Si · Do · Re · Mi · Fa♯ · Sol</td><td><span class="badge badge-orange">1♯</span></td></tr>
+    <tr><td>Re Mayor</td><td>Re · Mi · Fa♯ · Sol · La · Si · Do♯ · Re</td><td><span class="badge badge-orange">2♯</span></td></tr>
+    <tr><td>La Mayor</td><td>La · Si · Do♯ · Re · Mi · Fa♯ · Sol♯ · La</td><td><span class="badge badge-orange">3♯</span></td></tr>
+    <tr><td>Mi Mayor</td><td>Mi · Fa♯ · Sol♯ · La · Si · Do♯ · Re♯ · Mi</td><td><span class="badge badge-orange">4♯</span></td></tr>
+    <tr><td>Si Mayor</td><td>Si · Do♯ · Re♯ · Mi · Fa♯ · Sol♯ · La♯ · Si</td><td><span class="badge badge-orange">5♯</span></td></tr>
+    <tr><td>Fa♯ Mayor</td><td>Fa♯ · Sol♯ · La♯ · Si · Do♯ · Re♯ · Mi♯ · Fa♯</td><td><span class="badge badge-orange">6♯</span></td></tr>
+    <tr><td>Do♯ Mayor</td><td>Do♯ · Re♯ · Mi♯ · Fa♯ · Sol♯ · La♯ · Si♯ · Do♯</td><td><span class="badge badge-orange">7♯</span></td></tr>
+    <tr><td>Fa Mayor</td><td>Fa · Sol · La · Si♭ · Do · Re · Mi · Fa</td><td><span class="badge badge-pink">1♭</span></td></tr>
+    <tr><td>Si♭ Mayor</td><td>Si♭ · Do · Re · Mi♭ · Fa · Sol · La · Si♭</td><td><span class="badge badge-pink">2♭</span></td></tr>
+    <tr><td>Mi♭ Mayor</td><td>Mi♭ · Fa · Sol · La♭ · Si♭ · Do · Re · Mi♭</td><td><span class="badge badge-pink">3♭</span></td></tr>
+  </table>
+
+  <h3>Escalas Menores naturales — 11 implementadas</h3>
+  <table>
+    <tr><th>Escala</th><th>Notas (tónica → octava)</th><th>Alteraciones</th></tr>
+    <tr><td>La menor</td><td>La · Si · Do · Re · Mi · Fa · Sol · La</td><td><span class="badge badge-blue">0</span></td></tr>
+    <tr><td>Mi menor</td><td>Mi · Fa♯ · Sol · La · Si · Do · Re · Mi</td><td><span class="badge badge-orange">1♯</span></td></tr>
+    <tr><td>Si menor</td><td>Si · Do♯ · Re · Mi · Fa♯ · Sol · La · Si</td><td><span class="badge badge-orange">2♯</span></td></tr>
+    <tr><td>Fa♯ menor</td><td>Fa♯ · Sol♯ · La · Si · Do♯ · Re · Mi · Fa♯</td><td><span class="badge badge-orange">3♯</span></td></tr>
+    <tr><td>Do♯ menor</td><td>Do♯ · Re♯ · Mi · Fa♯ · Sol♯ · La · Si · Do♯</td><td><span class="badge badge-orange">4♯</span></td></tr>
+    <tr><td>Sol♯ menor</td><td>Sol♯ · La♯ · Si · Do♯ · Re♯ · Mi · Fa♯ · Sol♯</td><td><span class="badge badge-orange">5♯</span></td></tr>
+    <tr><td>Re menor</td><td>Re · Mi · Fa · Sol · La · Si♭ · Do · Re</td><td><span class="badge badge-pink">1♭</span></td></tr>
+    <tr><td>Sol menor</td><td>Sol · La · Si♭ · Do · Re · Mi♭ · Fa · Sol</td><td><span class="badge badge-pink">2♭</span></td></tr>
+    <tr><td>Do menor</td><td>Do · Re · Mi♭ · Fa · Sol · La♭ · Si♭ · Do</td><td><span class="badge badge-pink">3♭</span></td></tr>
+    <tr><td>Fa menor</td><td>Fa · Sol · La♭ · Si♭ · Do · Re♭ · Mi♭ · Fa</td><td><span class="badge badge-pink">4♭</span></td></tr>
+    <tr><td>Si♭ menor</td><td>Si♭ · Do · Re♭ · Mi♭ · Fa · Sol♭ · La♭ · Si♭</td><td><span class="badge badge-pink">5♭</span></td></tr>
+  </table>
+
+  <h3>Equivalencias enarmónicas reconocidas por el motor</h3>
+  <p>El motor acepta una carta si su nota <em>o</em> su enarmónico coincide con la posición objetivo. La resolución es bidireccional.</p>
+  <div class="enharmonic">
+    <div class="enharm-pair">Do♯ <span class="eq">=</span> Re♭</div>
+    <div class="enharm-pair">Re♯ <span class="eq">=</span> Mi♭</div>
+    <div class="enharm-pair">Mi♯ <span class="eq">=</span> Fa</div>
+    <div class="enharm-pair">Fa♯ <span class="eq">=</span> Sol♭</div>
+    <div class="enharm-pair">Sol♯ <span class="eq">=</span> La♭</div>
+    <div class="enharm-pair">La♯ <span class="eq">=</span> Si♭</div>
+    <div class="enharm-pair">Si♯ <span class="eq">=</span> Do</div>
+    <div class="enharm-pair">Fa♭ <span class="eq">=</span> Mi</div>
+    <div class="enharm-pair">Do♭ <span class="eq">=</span> Si</div>
+  </div>
+</section>
+
+<!-- ═══════════ 5. Mecánica del Turno ═══════════ -->
+<section id="s5">
+  <h2>5. Mecánica Central del Turno</h2>
+
+  <h3>Tamaño de mano y mecánica de victoria</h3>
+  <p>Cada jugador mantiene <strong>7 cartas en mano</strong>. La escala objetivo tiene <strong>8 posiciones</strong>. La victoria ocurre cuando, después de robar (mano temporal de 8 cartas), el jugador posee exactamente las 8 notas de su escala.</p>
+
+  <div class="flow">
+    <div class="flow-step">
+      <div class="step-num">1</div>
+      <div class="step-title">Inicio</div>
+      <div class="step-desc">7 cartas en mano. Evaluar opciones disponibles.</div>
+    </div>
+    <div class="flow-step">
+      <div class="step-num">2a</div>
+      <div class="step-title">Robar del mazo</div>
+      <div class="step-desc">+1 carta del tope del mazo de robo → 8 cartas.</div>
+    </div>
+    <div class="flow-step">
+      <div class="step-num">2b</div>
+      <div class="step-title">Tomar del descarte</div>
+      <div class="step-desc">+1 carta visible del tope del descarte → 8 cartas.</div>
+    </div>
+    <div class="flow-step">
+      <div class="step-num">2c</div>
+      <div class="step-title">Usar poder</div>
+      <div class="step-desc">Activar carta de poder. No se roba carta adicional.</div>
+    </div>
+    <div class="flow-step">
+      <div class="step-num">3</div>
+      <div class="step-title">¿Victoria?</div>
+      <div class="step-desc">Si las 8 cartas = escala objetivo → ¡GANÓ! Si no → paso 4.</div>
+    </div>
+    <div class="flow-step">
+      <div class="step-num">4</div>
+      <div class="step-title">Descartar</div>
+      <div class="step-desc">Mover 1 carta a la pila de descarte → volver a 7. Fin de turno.</div>
+    </div>
+  </div>
+
+  <h3>Preparación de la partida</h3>
+  <ol>
+    <li>Barajar las 120 cartas.</li>
+    <li>Repartir 7 notas a cada jugador. Si sale una carta de poder, el jugador la conserva como bonus y sigue recibiendo hasta tener 7 notas.</li>
+    <li>Colocar el resto boca abajo como mazo de robo.</li>
+    <li>Voltear la carta superior: si es de nota, inicia el descarte; si es de poder, devolverla al fondo del mazo y voltear otra.</li>
+    <li>Decidir al azar si la partida es de escalas <strong>Mayores</strong> o <strong>Menores</strong>.</li>
+    <li>Asignar o elegir la escala objetivo de cada jugador (del tipo decidido).</li>
+    <li>Elegir al azar el jugador inicial. Los turnos avanzan en sentido horario.</li>
+  </ol>
+
+  <div class="box box-yellow">
+    <h4>⚠️ Restricciones de construcción de escala (manual oficial)</h4>
+    <ul>
+      <li>La escala se forma en orden ascendente desde la tónica.</li>
+      <li>No se pueden repetir sonidos, excepto la octava (posición 8 repite posición 1).</li>
+      <li>Solo se construye una escala a la vez por jugador.</li>
+      <li>Los sonidos alterados son válidos siempre que correspondan a la escala objetivo.</li>
+    </ul>
+  </div>
+
+  <h3>Regla de mazo vacío</h3>
+  <p>Si el mazo de robo se agota, la pila de descarte (excepto la carta del tope) se baraja y se convierte en el nuevo mazo de robo.</p>
+</section>
+
+<!-- ═══════════ 6. Cartas de Poder ═══════════ -->
+<section id="s6">
+  <h2>6. Cartas de Poder</h2>
+  <p>4 tipos × 2 copias = <strong>8 cartas de poder</strong>. Se juegan como acción de turno <em>en lugar de</em> robar; el jugador no obtiene carta adicional ese turno.</p>
+
+  <div class="power-grid">
+    <div class="power-card becuadro">
+      <div class="symbol">♮</div>
+      <h4>Becuadro</h4>
+      <p>Convierte una carta alterada de tu mano en su nota natural equivalente. El jugador elige cuál de las dos notas naturales adyacentes utilizar (ej: Fa♯ → Fa ó Sol). La carta Becuadro va al descarte.</p>
+    </div>
+    <div class="power-card intercambio">
+      <div class="symbol">⇄</div>
+      <h4>Intercambio</h4>
+      <p>Toma una carta al azar de la mano de un rival y entrégale una carta de tu elección. El intercambio es simultáneo e irrechazable. Net efecto: un swap de cartas con un oponente.</p>
+    </div>
+    <div class="power-card skip">
+      <div class="symbol">⏭</div>
+      <h4>Skip</h4>
+      <p>El rival elegido pierde su próximo turno completo: no puede robar, tomar del descarte ni usar poderes. El jugador afectado queda marcado hasta que su turno es consumido.</p>
+    </div>
+    <div class="power-card cambio">
+      <div class="symbol">↺</div>
+      <h4>Cambio de Escala</h4>
+      <p>Cambia el tipo de escala de toda la partida (Mayor ↔ Menor, o a una escala específica). Todos los jugadores reciben nuevas escalas objetivo. Puede jugarse en cualquier momento antes de que haya un ganador.</p>
+    </div>
+  </div>
+
+  <h3>Secuencias de uso en la versión digital</h3>
+  <div class="card-grid">
+    <div class="card-item">
+      <h4><span class="badge badge-gray">♮ Becuadro</span></h4>
+      <p>Activar → seleccionar carta alterada en mano → elegir nota natural destino → carta convertida, Becuadro al descarte → turno termina.</p>
+    </div>
+    <div class="card-item">
+      <h4><span class="badge badge-purple">⇄ Intercambio</span></h4>
+      <p>Activar → elegir rival → sistema toma carta aleatoria del rival → jugador elige qué carta entregar → swap ejecutado → turno termina.</p>
+    </div>
+    <div class="card-item">
+      <h4><span class="badge badge-orange">⏭ Skip</span></h4>
+      <p>Activar → elegir rival objetivo → rival marcado SKIP → carta Skip al descarte → turno termina. El marcador se consume al inicio del turno del rival.</p>
+    </div>
+    <div class="card-item">
+      <h4><span class="badge badge-pink">↺ Cambio de Escala</span></h4>
+      <p>Activar → elegir Mayor o Menor → nuevas escalas asignadas a todos → carta al descarte → turno termina. Los progresos anteriores pueden quedar invalidados.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ 7. Condición de Victoria ═══════════ -->
+<section id="s7">
+  <h2>7. Condición de Victoria</h2>
+  <p>El juego termina cuando un jugador, después de robar (mano temporal de 8 cartas), tiene en su mano las 8 notas de su escala objetivo. La validación ocurre automáticamente en la versión digital.</p>
+
+  <div class="box box-green">
+    <h4>✅ Algoritmo de detección de victoria</h4>
+    Para cada posición <em>i</em> en las 8 notas objetivo: buscar en la mano una carta no-utilizada cuya nota sea enarmónicamente equivalente a la nota en posición <em>i</em>. Si las 8 posiciones encuentran carta → victoria. La posición 8 (octava) requiere una segunda carta con el nombre de la tónica, diferente a la usada en posición 1.
+  </div>
+
+  <h3>Desempate</h3>
+  <p>Si dos jugadores completan su escala en el mismo turno, gana quien tenga <strong>menos cartas en mano</strong> en ese momento.</p>
+
+  <h3>Pantalla de fin de partida — contenido</h3>
+  <ul>
+    <li>Nombre del ganador con animación de trofeo</li>
+    <li>Escala completada visualizada nota a nota (8 celdas)</li>
+    <li>Estadísticas: turnos jugados · tiempo total · número de jugadores</li>
+    <li>Acciones: «Jugar otra vez» (misma configuración) · «Volver al inicio»</li>
+  </ul>
+</section>
+
+<!-- ═══════════ 8. Pantallas UX ═══════════ -->
+<section id="s8">
+  <h2>8. Pantallas y Flujo de Jugador (UX)</h2>
+
+  <div class="screen-grid">
+    <div class="screen-box"><div class="screen-icon">🏠</div><div class="screen-name">Lobby</div></div>
+    <div class="screen-box"><div class="screen-icon">⚙️</div><div class="screen-name">Configuración</div></div>
+    <div class="screen-box"><div class="screen-icon">📖</div><div class="screen-name">Tutorial (5 slides)</div></div>
+    <div class="screen-box"><div class="screen-icon">🔄</div><div class="screen-name">Pasa el dispositivo</div></div>
+    <div class="screen-box"><div class="screen-icon">🎮</div><div class="screen-name">Tablero de juego</div></div>
+    <div class="screen-box"><div class="screen-icon">🏆</div><div class="screen-name">Fin de partida</div></div>
+  </div>
+
+  <h3>Lobby — 5 opciones</h3>
+  <table>
+    <tr><th>Opción</th><th>Estado actual</th><th>Descripción</th></tr>
+    <tr><td>🖥️ Partida Local</td><td><span class="badge badge-green">✅ Activo</span></td><td>2–6 jugadores en el mismo dispositivo (hot-seat)</td></tr>
+    <tr><td>🌐 Crear Partida</td><td><span class="badge badge-orange">🔜 Pendiente</span></td><td>Genera un código de sala para multijugador online</td></tr>
+    <tr><td>👥 Unirse a Partida</td><td><span class="badge badge-orange">🔜 Pendiente</span></td><td>Ingreso con código de sala de otro jugador</td></tr>
+    <tr><td>📖 Tutorial</td><td><span class="badge badge-green">✅ Activo</span></td><td>5 diapositivas con reglas y ejemplos visuales</td></tr>
+    <tr><td>🤖 vs. IA</td><td><span class="badge badge-gray">💡 Futuro</span></td><td>Oponente artificial, 3 niveles de dificultad</td></tr>
+  </table>
+
+  <h3>Tablero de juego — Layout</h3>
+  <div class="box box-blue">
+    <h4>Distribución de zonas</h4>
+    <strong>Zona superior:</strong> otros jugadores — nombre, contador de cartas (boca abajo), barra de progreso de escala por nota.<br>
+    <strong>Zona central:</strong> mazo de robo (clickable), tope del descarte (clickable), indicador de turno activo, estado de la acción actual.<br>
+    <strong>Zona inferior:</strong> mano del jugador activo (cartas interactivas y seleccionables), barra de progreso de su escala con nota a nota.
+  </div>
+
+  <h3>Pantalla «Hot Seat» — privacidad entre turnos</h3>
+  <p>Antes de cada turno, una pantalla opaca cubre la mano del jugador anterior y muestra el nombre del próximo jugador. Éste toca «Ver mis cartas →» para revelar su mano. Este mecanismo protege la información de los rivales en el contexto de juego compartido.</p>
+
+  <h3>Feedback de estado durante el turno</h3>
+  <ul>
+    <li><strong>«Roba o usa un poder»</strong> — inicio de turno normal</li>
+    <li><strong>«↓ Descarta una carta»</strong> — después de robar, animado</li>
+    <li><strong>«Toca una carta alterada»</strong> — al activar Becuadro</li>
+    <li><strong>«↑ Elige un rival»</strong> — al activar Skip o Intercambio</li>
+    <li><strong>«Elige el nuevo tipo»</strong> — al activar Cambio de Escala</li>
+  </ul>
+</section>
+
+<!-- ═══════════ 9. Diseño Visual de Cartas ═══════════ -->
+<section id="s9">
+  <h2>9. Diseño Visual de Cartas</h2>
+
+  <h3>Cartas de notas — paleta de colores</h3>
+  <div class="card-grid">
+    <div class="card-item" style="border-left:4px solid #ec4899">
+      <h4><span class="badge badge-pink">🩷 Rosa / Fucsia</span></h4>
+      <p>Gradiente: #ec4899 → #be185d. Corresponde al color principal de marca Musiktoys.</p>
+    </div>
+    <div class="card-item" style="border-left:4px solid #2563eb">
+      <h4><span class="badge badge-blue">💙 Azul</span></h4>
+      <p>Gradiente: #2563eb → #1e40af. Azul institucional Musiktoys, máximo contraste con texto blanco.</p>
+    </div>
+    <div class="card-item" style="border-left:4px solid #f97316">
+      <h4><span class="badge badge-orange">🟠 Naranja</span></h4>
+      <p>Gradiente: #fb923c → #ea580c. Color cálido de alta visibilidad sobre el tablero oscuro.</p>
+    </div>
+    <div class="card-item" style="border-left:4px solid #22c55e">
+      <h4><span class="badge badge-green">💚 Verde</span></h4>
+      <p>Gradiente: #22c55e → #15803d. Verde de marca Musiktoys, también usado en el indicador de progreso.</p>
+    </div>
+  </div>
+
+  <h3>Notación en pantalla</h3>
+  <p>Los símbolos de alteración se renderizan con Unicode: <strong>♯</strong> (U+266F) para sostenidos y <strong>♭</strong> (U+266D) para bemoles, en lugar de los caracteres ASCII # y b. Esto mejora la legibilidad y es fiel a la notación musical estándar.</p>
+
+  <h3>Cartas de poder — diseño</h3>
+  <p>Fondo oscuro con gradiente específico por tipo (gris, morado, ámbar, rojo), símbolo central en tipografía grande, nombre de la carta en fuente sans-serif blanca. El diseño es intencionalmente distinto al de las cartas de nota para evitar confusión en juego rápido.</p>
+
+  <h3>Carta boca abajo (mano ajena / mazo)</h3>
+  <p>Fondo azul marino con ícono 🎵 translúcido. Usada para representar las manos de los rivales y el mazo de robo. Uniformidad total: ningún indicio del contenido.</p>
+</section>
+
+<!-- ═══════════ 10. Roadmap ═══════════ -->
+<section id="s10">
+  <h2>10. Roadmap de Funcionalidades</h2>
+  <table>
+    <tr><th>Prioridad</th><th>Funcionalidad</th><th>Estado</th></tr>
+    <tr><td>P0 — Core</td><td>Partida local 2–6 jugadores (hot-seat)</td><td><span class="badge badge-green">✅ Listo</span></td></tr>
+    <tr><td>P0 — Core</td><td>Motor de juego completo (22 escalas, enarmónica, 4 poderes)</td><td><span class="badge badge-green">✅ Listo</span></td></tr>
+    <tr><td>P0 — Core</td><td>Tutorial interactivo (5 diapositivas)</td><td><span class="badge badge-green">✅ Listo</span></td></tr>
+    <tr><td>P0 — Core</td><td>Botón «Jugar Online» en navbar de musiktoys.com</td><td><span class="badge badge-green">✅ Listo</span></td></tr>
+    <tr><td>P0 — Core</td><td>GDD v1.0</td><td><span class="badge badge-green">✅ Este documento</span></td></tr>
+    <tr><td>P1 — Alto</td><td>Multijugador online en tiempo real (WebSocket, código de sala)</td><td><span class="badge badge-orange">📋 Tarea #4</span></td></tr>
+    <tr><td>P1 — Alto</td><td>Oponente IA — 3 niveles de dificultad</td><td><span class="badge badge-orange">📋 Tarea #5</span></td></tr>
+    <tr><td>P2 — Medio</td><td>App móvil nativa (Expo / React Native)</td><td><span class="badge badge-orange">📋 Tarea #6</span></td></tr>
+    <tr><td>P2 — Medio</td><td>Animaciones de cartas (drag &amp; drop, efecto flip)</td><td><span class="badge badge-gray">🔜 Futuro</span></td></tr>
+    <tr><td>P2 — Medio</td><td>Efectos de sonido y música ambiental</td><td><span class="badge badge-gray">🔜 Futuro</span></td></tr>
+    <tr><td>P3 — Bajo</td><td>Tabla de clasificación / historial de partidas</td><td><span class="badge badge-gray">🔜 Futuro</span></td></tr>
+    <tr><td>P3 — Bajo</td><td>Variante: escalas armónica y melódica menor</td><td><span class="badge badge-gray">🔜 Futuro</span></td></tr>
+    <tr><td>P3 — Bajo</td><td>Modo torneo con eliminación en múltiples rondas</td><td><span class="badge badge-gray">🔜 Futuro</span></td></tr>
+  </table>
+</section>
+
+<!-- ═══════════ 11. Glosario ═══════════ -->
+<section id="s11">
+  <h2>11. Glosario</h2>
+  <table>
+    <tr><th>Término</th><th>Definición</th></tr>
+    <tr><td><strong>Tónica</strong></td><td>Primera nota de la escala; también la última (octava). Ej: en Sol Mayor, la tónica es Sol.</td></tr>
+    <tr><td><strong>Octava</strong></td><td>La nota número 8, idéntica en nombre a la tónica. Requiere una segunda carta distinta con ese nombre.</td></tr>
+    <tr><td><strong>Enarmónico</strong></td><td>Dos notas con el mismo sonido pero diferente nombre (Fa♯ = Sol♭). El motor acepta ambas para la misma posición.</td></tr>
+    <tr><td><strong>Alteración</strong></td><td>Modificación de un semitono aplicada a una nota natural. Sostenido (♯) sube; bemol (♭) baja.</td></tr>
+    <tr><td><strong>Becuadro (♮)</strong></td><td>Símbolo musical que cancela una alteración. En el juego, nombre de la carta de poder que convierte notas alteradas a naturales.</td></tr>
+    <tr><td><strong>Intervalo de Tono</strong></td><td>Distancia de 2 semitonos entre dos notas consecutivas.</td></tr>
+    <tr><td><strong>Intervalo de Semitono</strong></td><td>Distancia de 1 semitono entre dos notas consecutivas.</td></tr>
+    <tr><td><strong>Hot-seat</strong></td><td>Modo multijugador local donde varios jugadores comparten un dispositivo, pasándolo por turnos.</td></tr>
+    <tr><td><strong>Mazo de robo</strong></td><td>Pila central de cartas boca abajo de donde los jugadores roban en su turno.</td></tr>
+    <tr><td><strong>Pila de descarte</strong></td><td>Pila visible donde los jugadores depositan cartas no deseadas. El tope puede ser tomado por el siguiente jugador como acción de turno.</td></tr>
+    <tr><td><strong>GDD</strong></td><td>Game Design Document. Documento de referencia que define las reglas, mecánicas y visión completa de un juego.</td></tr>
+  </table>
+</section>
+
+</div><!-- /content -->
+
+<footer>
+  ESCALA Game — Game Design Document v1.0 &nbsp;·&nbsp; Musiktoys &nbsp;·&nbsp; Julio 2026<br>
+  Generado a partir del Manual del Juego oficial y la implementación digital. Documento interno de diseño.
+</footer>
+
+</body>
+</html>
